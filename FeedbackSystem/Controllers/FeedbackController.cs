@@ -1,7 +1,10 @@
 ﻿using FeedbackSystem.Data;
 using FeedbackSystem.Models;
+using FeedbackSystem.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
+// ID: 00016119
 
 namespace FeedbackSystem.Controllers
 {
@@ -9,66 +12,62 @@ namespace FeedbackSystem.Controllers
     [Route("api/[controller]")]
     public class FeedbackController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IFeedbackRepository _feedbackRepo;
 
-        public FeedbackController(AppDbContext context)
+
+        public FeedbackController(IUnitOfWork unitOfWork, IFeedbackRepository feedbackRepo)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
+            _feedbackRepo = feedbackRepo;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Feedback>>> GetAll()
         {
-            var list = await _context.Feedbacks
-                .Include(f => f.User)
-                .Include(f => f.Category)
-                .ToListAsync();
-
-            return Ok(list);
+            var items = await _feedbackRepo.GetAllWithUserAndCategoryAsync();
+            return Ok(items);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Feedback>> GetById(int id)
         {
-            var item = await _context.Feedbacks
-                .Include(f => f.User)
-                .Include(f => f.Category)
-                .FirstOrDefaultAsync(f => f.FeedbackId == id);
-
+            var item = await _feedbackRepo.GetByIdWithUserAndCategoryAsync(id);
             if (item == null)
                 return NotFound();
-
             return Ok(item);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create(Feedback feedback)
+        public async Task<ActionResult<Feedback>> Create([FromBody] Feedback feedback)
         {
-            await _context.Feedbacks.AddAsync(feedback);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.Feedbacks.AddAsync(feedback);
+            await _unitOfWork.CommitAsync();
             return CreatedAtAction(nameof(GetById), new { id = feedback.FeedbackId }, feedback);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, Feedback feedback)
+        public async Task<IActionResult> Update(int id, [FromBody] Feedback feedback)
         {
             if (id != feedback.FeedbackId)
                 return BadRequest();
 
-            _context.Feedbacks.Update(feedback);
-            await _context.SaveChangesAsync();
+            _unitOfWork.Feedbacks.Update(feedback);
+            await _unitOfWork.CommitAsync();
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var entity = await _context.Feedbacks.FindAsync(id);
-            if (entity == null) return NotFound();
+            var feedback = await _unitOfWork.Feedbacks.GetByIdAsync(id);
+            if (feedback == null)
+                return NotFound();
 
-            _context.Feedbacks.Remove(entity);
-            await _context.SaveChangesAsync();
+            _unitOfWork.Feedbacks.Delete(feedback);
+            await _unitOfWork.CommitAsync();
             return NoContent();
         }
     }
+
 }
