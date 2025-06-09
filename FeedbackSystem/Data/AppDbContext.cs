@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FeedbackSystem.Data
 {
-    public class AppDBContext: DbContext
+    public class AppDbContext: DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
@@ -18,10 +18,6 @@ namespace FeedbackSystem.Data
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<Role> Roles { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-            // Add any fluent configuration here
-        }
+        
     }
 }
