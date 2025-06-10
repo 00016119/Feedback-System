@@ -1,0 +1,32 @@
+<h2>Create Feedback</h2>
+
+<form (ngSubmit)="submitFeedback()" #form="ngForm">
+  <div class="mb-3">
+    <label for="content" class="form-label">Content</label>
+    <textarea id="content" class="form-control" required [(ngModel)]="feedback.content" name="content"></textarea>
+  </div>
+
+  <div class="mb-3">
+    <label for="category" class="form-label">Category</label>
+    <select id="category" class="form-select" [(ngModel)]="feedback.categoryId" name="categoryId" required>
+      <option value="" disabled selected>-- Select Category --</option>
+      <option *ngFor="let cat of categories" [value]="cat.categoryId">{{ cat.name }}</option>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="user" class="form-label">User</label>
+    <select id="user" class="form-select" [(ngModel)]="feedback.userId" name="userId" required>
+      <option value="" disabled selected>-- Select User --</option>
+      <option *ngFor="let user of users" [value]="user.userId">{{ user.username }}</option>
+    </select>
+  </div>
+
+  <div class="form-check mb-3">
+    <input type="checkbox" class="form-check-input" [(ngModel)]="feedback.isApproved" name="isApproved" id="approved">
+    <label for="approved" class="form-check-label">Mark as approved</label>
+  </div>
+
+  <button type="submit" class="btn btn-success">Submit</button>
+  <a routerLink="/feedbacks" class="btn btn-secondary ms-2">Cancel</a>
+</form>

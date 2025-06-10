@@ -1,0 +1,34 @@
+<h2>Feedback List</h2>
+
+<a routerLink="/feedbacks/create" class="btn btn-primary mb-3">Create New Feedback</a>
+
+<div *ngIf="isLoading">Loading feedbacks...</div>
+
+<table *ngIf="!isLoading && feedbacks.length" class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Content</th>
+      <th>Created At</th>
+      <th>User</th>
+      <th>Category</th>
+      <th>Approved</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let fb of feedbacks">
+      <td>{{ fb.feedbackId }}</td>
+      <td>{{ fb.content }}</td>
+      <td>{{ fb.createdAt | date: 'short' }}</td>
+      <td>{{ fb.user?.username || 'N/A' }}</td>
+      <td>{{ fb.category?.name || 'N/A' }}</td>
+      <td>{{ fb.isApproved ? 'Yes' : 'No' }}</td>
+      <td>
+        <a [routerLink]="['/feedbacks/edit', fb.feedbackId]" class="btn btn-sm btn-info">Edit</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<p *ngIf="!isLoading && !feedbacks.length">No feedbacks available.</p>
